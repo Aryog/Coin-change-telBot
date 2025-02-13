@@ -107,7 +107,7 @@ async def price(update: Update, context: CallbackContext) -> None:
     else:
         await update.message.reply_text("Failed to retrieve price data.")
 
-def calculate_percentage_change(context: CallbackContext) -> None:
+async def calculate_percentage_change(context: CallbackContext) -> None:
     change_data = get_current_price()
     
     if change_data and isinstance(change_data, list) and len(change_data) > 0:
@@ -116,35 +116,36 @@ def calculate_percentage_change(context: CallbackContext) -> None:
         
         op = data.get('open')
         cp = data.get('close')
+        print(op, cp)
         
         if cp > op:
             change = ((cp - op) / op) * 100
             message = f"🚀 $TOKEN surged by {change:.2f}% in the last 15 minutes! New LTP: {cp} DeSo."
-            post_to_deso(message)  # Post to DeSo blockchain
-            print("Posting to DeSo")
-            broadcast_message(context, message)
+            if change >= 10:
+                await post_to_deso(message)  # Await the async function
+                print("Posting to DeSo")
+            await broadcast_message(context, message)  # Await the async function
             print("Broadcasting message")
         elif cp < op:
             change = ((op - cp) / op) * 100
             message = f"📉 $TOKEN dropped by {change:.2f}% in the last 15 minutes! New LTP: {cp} DeSo."
-            post_to_deso(message)  # Post to DeSo blockchain
-            print("Posting to DeSo")
-            broadcast_message(context, message)
+            if change >= 10:
+                await post_to_deso(message)  # Await the async function
+                print("Posting to DeSo")
+            await broadcast_message(context, message)  # Await the async function
             print("Broadcasting message")
         else:
             message = "No change in price."
-            post_to_deso(message)  # Post to DeSo blockchain
-            broadcast_message(context, message)
             print("No change in price")
 
     else:
         logger.error("Failed to retrieve 15-minute change data.")
 
-def broadcast_message(context: CallbackContext, message: str) -> None:
+async def broadcast_message(context: CallbackContext, message: str) -> None:
     subscribers = load_chat_ids()  # Load the list of subscribers
     for chat_id in subscribers:
         try:
-            context.bot.send_message(chat_id=chat_id, text=message)
+            await context.bot.send_message(chat_id=chat_id, text=message)
         except Exception as e:
             logger.error(f"Failed to send message to {chat_id}: {e}")
 
@@ -171,7 +172,7 @@ def main() -> None:
 
     # Add job to check 15-minute change every 15 minutes
     job_queue = application.job_queue
-    job_queue.run_repeating(calculate_percentage_change, interval=60, first=0)
+    job_queue.run_repeating(calculate_percentage_change, interval=900, first=0)
 
     # Start the Bot
     application.run_polling()

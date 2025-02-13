@@ -328,7 +328,7 @@ class DeSoDexClient:
             return hex(base_units)
         return str(base_units)
 
-def post_to_deso(message: str):
+async def post_to_deso(message: str):
     # Configuration YOGAR configuration
     SEED_HEX = os.getenv("SEED_HEX")
     IS_TESTNET = False
