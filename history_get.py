@@ -24,6 +24,7 @@ def get_current_price():
     if response.status_code == 200:
         data = response.json()
         # Assuming the data is a list of dictionaries
+        print(data)
         return data
     else:
         return None

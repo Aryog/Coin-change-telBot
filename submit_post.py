@@ -328,8 +328,7 @@ class DeSoDexClient:
             return hex(base_units)
         return str(base_units)
 
-
-def main():
+def post_to_deso(message: str):
     # Configuration YOGAR configuration
     SEED_HEX = os.getenv("SEED_HEX")
     IS_TESTNET = False
@@ -351,7 +350,7 @@ def main():
         print('Constructing submit-post txn...')
         post_response = client.submit_post(
             updater_public_key_base58check=string_pubkey,
-            body="IT WORKED!",
+            body=message,
             parent_post_hash_hex="",  # Example parent post hash
             title="",
             image_urls=[],
@@ -372,4 +371,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    post_to_deso("IT WORKED!")
